@@ -8,6 +8,6 @@ import { validateRequest } from "../../middlewares/validateRequest";
 const router = Router()
 
 router.post("/register", validateRequest(createUserZodSchema), UserControllers.createUser)
-router.post("/all-users", UserControllers.getAllUsers)
+router.get("/all-users", UserControllers.getAllUsers)
 
 export const UserRoutes = router
