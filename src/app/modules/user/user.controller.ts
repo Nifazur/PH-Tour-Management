@@ -42,7 +42,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 //     }
 // }
 
-const getAllUsers = catchAsync(async(req: Request, res: Response, next: NextFunction) => {
+const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const result = await UserServices.getAllUsers();
     // res.status(httpStatus.OK).json({
     //     success: true,
@@ -57,13 +57,14 @@ const getAllUsers = catchAsync(async(req: Request, res: Response, next: NextFunc
         meta: result.meta
     })
 })
-const updateUser = catchAsync(async(req: Request, res: Response, next: NextFunction) => {
+const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id
     const payload = req.body
-    const token = req.headers.authorization
-    const verifiedToken = verifyToken(token as string, envVars.JWT_ACCESS_SECRET) as JwtPayload
+    const verifiedToken = req.user
+    // const token = req.headers.authorization
+    // const verifiedToken = verifyToken(token as string, envVars.JWT_ACCESS_SECRET) as JwtPayload
     const result = await UserServices.updateUser(userId, payload, verifiedToken);
-    
+
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
