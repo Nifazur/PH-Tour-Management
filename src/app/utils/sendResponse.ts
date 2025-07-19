@@ -1,16 +1,15 @@
 import { Response } from "express";
-import { success } from "zod";
 
 interface TMeta {
     total: number
 }
 
 interface TResponse<T> {
-    statusCode : number;
-    success : boolean;
+    statusCode: number;
+    success: boolean;
     message: string;
     data: T;
-    meta ?: TMeta
+    meta?: TMeta
 }
 
 export const sendResponse = <T>(res: Response, data: TResponse<T>) => {
