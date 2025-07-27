@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from 'http-status-codes'
 import { catchAsync } from "../../utils/catchAsync";
@@ -9,9 +10,39 @@ import { setAuthCookie } from '../../utils/setCookie';
 import { createUserTokens } from '../../utils/userTokens';
 import { envVars } from '../../config/env';
 import { JwtPayload } from 'jsonwebtoken';
+import passport from 'passport';
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
-    const logInInfo = await AuthServices.credentialsLogin(req.body)
+    // const logInInfo = await AuthServices.credentialsLogin(req.body)
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+        if(err){
+            // return next(err)
+            return next(new AppError(401, err))
+            // return new AppError(401, err)
+        }
+        if(!user){
+            // return new AppError(401, info.message)
+            return next(new AppError(401, info.message))
+        }
+        const userTokens = await createUserTokens(user)
+
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        setAuthCookie(res, userTokens)
+        
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "User Logged In Successfully",
+            data: {
+                accessToken: userTokens.accessToken,
+                refreshToken: userTokens.refreshToken,
+                user: userWithoutPassword
+            }
+        })
+    })(req, res, next)
     // res.cookie("accessToken",logInInfo.accessToken,{
     //     httpOnly: true,
     //     secure: false
@@ -21,14 +52,6 @@ const credentialsLogin = catchAsync(async (req: Request, res: Response, next: Ne
     //     secure: false
     // })
 
-    setAuthCookie(res, logInInfo)
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "User Logged In Successfully",
-        data: logInInfo
-    })
 })
 const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const refreshToken = req.cookies.refreshToken;
